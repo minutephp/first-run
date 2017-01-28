@@ -1,0 +1,19 @@
+<VirtualHost *:80>
+	ServerName {domain}
+
+	RewriteEngine On
+	RewriteRule ^/(.*)$ http://www.{domain}/$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:80>
+	DocumentRoot "{path}"
+	ServerName www.{domain}
+	ServerAlias *.{domain}
+
+    <Directory "{path}">
+		DirectoryIndex index.php
+
+		FallbackResource /index.php
+    </Directory>
+
+</VirtualHost>

@@ -1,0 +1,90 @@
+-- Adminer 4.2.5 MySQL dump
+
+SET NAMES utf8;
+SET time_zone = '+00:00';
+
+CREATE TABLE IF NOT EXISTS  `m_configs` (
+  `config_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(20) NOT NULL,
+  `data_json` longtext,
+  PRIMARY KEY (`config_id`),
+  UNIQUE KEY `type` (`type`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS  `m_events` (
+  `event_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `handler` varchar(100) NOT NULL,
+  `data` varchar(255) DEFAULT NULL,
+  `priority` int(11) DEFAULT '0',
+  `comments` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  UNIQUE KEY `event_name_event_handler` (`name`,`handler`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS  `m_event_names` (
+  `event_name_id` int(11) NOT NULL AUTO_INCREMENT,
+  `event_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`event_name_id`),
+  UNIQUE KEY `event_name` (`event_name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS  `m_user_activities` (
+  `user_activity_id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `event_name_id` int(11) NOT NULL,
+  `event_data` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_activity_id`),
+  KEY `user_id` (`user_id`),
+  KEY `event_name_id_event_data` (`event_name_id`,`event_data`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS  `m_user_data` (
+  `user_data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `data` longtext NOT NULL,
+  PRIMARY KEY (`user_data_id`),
+  UNIQUE KEY `user_id_key` (`user_id`,`key`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS  `m_user_groups` (
+  `user_group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `cart_id` int(11) DEFAULT '0',
+  `group_name` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `credits` int(11) NOT NULL,
+  `comments` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`user_group_id`),
+  KEY `user_id_expires_credits` (`user_id`,`expires_at`,`credits`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS  `users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ident` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `photo_url` varchar(255) DEFAULT NULL,
+  `tz_offset` int(11) DEFAULT NULL,
+  `ip_addr` varchar(15) DEFAULT NULL,
+  `verified` enum('false','true') DEFAULT 'false',
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `ident` (`ident`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- 2016-08-25 21:33:11
