@@ -12,6 +12,7 @@ namespace App\Controller {
     use Minute\Lang\Lang;
     use Minute\Plugin\PluginInstaller;
     use Minute\Session\Session;
+    use Minute\Password\PasswordHash;
     use Minute\Utils\Sniffer;
     use Minute\View\View;
 
@@ -40,6 +41,10 @@ namespace App\Controller {
          * @var Sniffer
          */
         private $sniffer;
+        /**
+         * @var PasswordHash
+         */
+        private $passwordHash;
 
         /**
          * FirstRun constructor.
@@ -53,20 +58,18 @@ namespace App\Controller {
          *
          * @param Sniffer $sniffer
          *
+         * @param PasswordHash $passwordHash
+         *
          * @throws FirstRunError
          */
-        public function __construct(Database $database, Lang $lang, BootLoader $bootLoader, Session $session, PluginInstaller $installer, Sniffer $sniffer) {
-            $this->lang       = $lang;
-            $this->database   = $database;
-            $this->bootLoader = $bootLoader;
-            $this->session    = $session;
-            $this->installer  = $installer;
-            $this->sniffer    = $sniffer;
-
-            if (@$_GET['reset'] === '1') {
-                //`echo drop database fff; create database fff; | mysql -uroot -psan`;
-                @unlink($this->bootLoader->getBaseDir() . '/app/Config/db-config');
-            }
+        public function __construct(Database $database, Lang $lang, BootLoader $bootLoader, Session $session, PluginInstaller $installer, Sniffer $sniffer, PasswordHash $passwordHash) {
+            $this->lang         = $lang;
+            $this->database     = $database;
+            $this->bootLoader   = $bootLoader;
+            $this->session      = $session;
+            $this->installer    = $installer;
+            $this->sniffer      = $sniffer;
+            $this->passwordHash = $passwordHash;
 
             if ($this->database->isConnected()) {
                 throw new FirstRunError($this->lang->getText('Database has already been setup. Please remove the database configuration file (\app\Config\db-config) before running this script.'));
@@ -91,7 +94,7 @@ namespace App\Controller {
                             if (file_put_contents($conf, sprintf('mysql://%s:%s@%s/%s', $params['db']['username'], $params['db']['password'], $params['db']['host'], $params['db']['database']))) {
                                 if ($this->installer->install(['minutephp/site'], 'require', true)) {
                                     $sth = $pdo->prepare('REPLACE INTO users SET email = :email, password = :password, ip_addr = :ip, created_at = NOW(), updated_at = NOW(), first_name = "Admin", verified = "true"');
-                                    $sth->execute(['email' => sprintf('admin@%s', $params['site']['domain'] ?? 'localhost'), 'password' => password_hash(Str::random(), PASSWORD_DEFAULT),
+                                    $sth->execute(['email' => sprintf('admin@%s', $params['site']['domain'] ?? 'localhost'), 'password' => $this->passwordHash->getHashedPassword(Str::random()),
                                                    'ip' => $this->sniffer->getUserIP()]);
 
                                     if ($admin_id = $pdo->lastInsertId()) {
