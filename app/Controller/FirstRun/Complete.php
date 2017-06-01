@@ -41,7 +41,7 @@ namespace App\Controller\FirstRun {
         public function update($email, $password) {
             if (!empty($email) && !empty($password) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 if ($user = User::find($this->session->getLoggedInUserId())) {
-                    $event = new UserUpdateDataEvent($user, ['email' => $email, 'password' => $this->passwordHash->getHashedPassword($password)]);
+                    $event = new UserUpdateDataEvent($user, ['email' => $email, 'password' => $password]);
                     $this->dispatcher->fire(UserUpdateDataEvent::USER_UPDATE_DATA, $event);
 
                     if ($event->isHandled()) {
